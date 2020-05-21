@@ -147,6 +147,8 @@ def minimax_value(board, white_turn, search_depth, alpha, beta):
     legal_moves = generate_legal_moves(board, white_turn)
     if not legal_moves:
         end_value = find_winner(board)
+        #skipped turn case
+        #if there are no moves and there is no winner/tie
         if end_value == NOBODY:
             return minimax_value(board, not white_turn, search_depth, alpha, beta)
         elif end_value == TIE:
@@ -154,24 +156,28 @@ def minimax_value(board, white_turn, search_depth, alpha, beta):
         return end_value * WIN_VAL
     
     val = 0
-    
+    #set val to infinite
     if white_turn:
-        val = -101
+        val = float("-inf")
     else:
-        val = 101
+        val = float("inf")
     
+    #go through legal moves
     for m in legal_moves:
         new_board = play_move(board, m, white_turn)
         capture(new_board, m[0], m[1], white_turn)
-        #COMMENTS
         compare_val = minimax_value(new_board, not white_turn, search_depth - 1, alpha, beta)
         if (white_turn):
+            #if it's white's turn, find the max number
             val = max(val, compare_val)
+            #beta pruning
             if (val > beta):
                 return val
             beta = min(val, beta)
         else:
+            #if it's black's turn, find the min number
             val = min(val, compare_val)
+            #alpha pruning
             if (val < alpha): 
                 return val
             alpha = max(val, alpha)
