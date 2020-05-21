@@ -142,7 +142,57 @@ def check_game_over(board):
 # alpha and beta are the bounds on viable play values used in alpha-beta pruning
 def minimax_value(board, white_turn, search_depth, alpha, beta):
     # TODO
-    return 0
+    if search_depth == 0:
+        return eval_func(board)
+
+    legal_moves = generate_legal_moves(board, white_turn)
+    if legal_moves:
+        end_value = find_winner(board)
+        if end_value == NOBODY:
+            return minimax_value(board, not white_turn, search_depth, alpha, beta)
+        elif end_value == TIE:
+            return end_value
+        return end_value * WIN_VAL
+    
+    val = 0
+    if white_turn:
+        val = 101
+    else:
+        val = -101
+
+    for m in legal_moves:
+        new_board = play_move(board, m, white_turn)
+        #COMMENTS
+        compare_val = minimax_value(new_board, not white_turn, search_depth - 1, alpha, beta)
+        if (white_turn):
+            val = max(val, compare_val)
+            if (val > beta):
+                return val
+            beta = min(val, beta)
+        else:
+            val = min(val, compare_val)
+            if (val < alpha):
+                return val
+            alpha = max(val, alpha)
+
+    '''
+    Max_decision(game_state):
+        For each action in game_state
+            Find min value (play(action, game_state))
+            Return action with largest value 
+    Min_value(game_state):
+        If game is over: return value of ending
+        If search depth limit is reached: return eval_func(game_state); otherwise return min(apply max_value to list of next states)
+    Max_value(game_state):
+        If game is over: return value of the game
+        If search depth limit is reached: return eval_func(game_state); otherwise return max(apply min_value to list of next states)
+    '''
+    return val
+
+def eval_func(board):
+    white_count = np.count_nonzero(board == WHITE)
+    black_count = np.count_nonzero(board == BLACK)
+    return white_count - black_count
 
 # Printing a board (and return null), for interactive mode
 def print_board(board):
@@ -161,6 +211,7 @@ def print_board(board):
 def play():
     board = starting_board()
     while check_game_over(board) == NOBODY:
+        print_board(board)
         # White turn (AI)
         legal_moves = generate_legal_moves(board, True)
         if legal_moves:  # (list is non-empty)
