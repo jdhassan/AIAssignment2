@@ -141,12 +141,11 @@ def check_game_over(board):
 # search depth is the depth remaining, decremented for recursive calls
 # alpha and beta are the bounds on viable play values used in alpha-beta pruning
 def minimax_value(board, white_turn, search_depth, alpha, beta):
-    # TODO
     if search_depth == 0:
         return eval_func(board)
 
     legal_moves = generate_legal_moves(board, white_turn)
-    if legal_moves:
+    if not legal_moves:
         end_value = find_winner(board)
         if end_value == NOBODY:
             return minimax_value(board, not white_turn, search_depth, alpha, beta)
@@ -155,13 +154,15 @@ def minimax_value(board, white_turn, search_depth, alpha, beta):
         return end_value * WIN_VAL
     
     val = 0
+    
     if white_turn:
-        val = 101
-    else:
         val = -101
-
+    else:
+        val = 101
+    
     for m in legal_moves:
         new_board = play_move(board, m, white_turn)
+        capture(new_board, m[0], m[1], white_turn)
         #COMMENTS
         compare_val = minimax_value(new_board, not white_turn, search_depth - 1, alpha, beta)
         if (white_turn):
@@ -171,22 +172,10 @@ def minimax_value(board, white_turn, search_depth, alpha, beta):
             beta = min(val, beta)
         else:
             val = min(val, compare_val)
-            if (val < alpha):
+            if (val < alpha): 
                 return val
             alpha = max(val, alpha)
 
-    '''
-    Max_decision(game_state):
-        For each action in game_state
-            Find min value (play(action, game_state))
-            Return action with largest value 
-    Min_value(game_state):
-        If game is over: return value of ending
-        If search depth limit is reached: return eval_func(game_state); otherwise return min(apply max_value to list of next states)
-    Max_value(game_state):
-        If game is over: return value of the game
-        If search depth limit is reached: return eval_func(game_state); otherwise return max(apply min_value to list of next states)
-    '''
     return val
 
 def eval_func(board):
